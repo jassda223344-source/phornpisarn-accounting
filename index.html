@@ -1,40 +1,109 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>พรพิศาล ค้าส่ง | ระบบบัญชี</title>
+  <style>
+    body { margin:0; font-family: Arial; background:#f1f5f9; }
+    .center { max-width:400px; margin:80px auto; background:#fff; padding:20px; border-radius:8px; }
+    input, button { width:100%; padding:10px; margin:6px 0; }
+    button { background:#0f172a; color:#fff; border:none; }
+    .layout { display:flex; min-height:100vh; }
+    .sidebar { width:220px; background:#0f172a; color:#fff; padding:15px; }
+    .sidebar button { width:100%; margin:5px 0; padding:10px; background:#1e293b; color:#fff; border:none; text-align:left; }
+    .content { flex:1; padding:20px; }
+    .card { background:#fff; padding:15px; border-radius:8px; }
+    .hidden { display:none; }
+    @media(max-width:768px){
+      .layout{ flex-direction:column; }
+      .sidebar{ width:100%; }
+    }
+  </style>
 </head>
 <body>
-  <h2>เข้าสู่ระบบบัญชี - พรพิศาล ค้าส่ง</h2>
 
-  <input id="user" placeholder="Username" />
-  <br><br>
-  <input id="pass" type="password" placeholder="Password" />
-  <br><br>
+<!-- 🔐 LOGIN -->
+<div id="login" class="center hidden">
+  <h2>เข้าสู่ระบบบัญชี</h2>
+  <input id="user" placeholder="Username">
+  <input id="pass" type="password" placeholder="Password">
   <button onclick="login()">เข้าสู่ระบบ</button>
+</div>
 
-  <script>
-    function login() {
-      fetch('https://phornpisarn-backend-live.onrender.com/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: user.value,
-          password: pass.value
-        })
-      })
-      .then(res => {
-        if (!res.ok) throw new Error('Login failed');
-        return res.json();
-      })
-      .then(data => {
-        localStorage.setItem('token', data.token);
-        alert('เข้าสู่ระบบสำเร็จ');
-        // ต่อไปจะพาไปหน้าเมนู
-      })
-      .catch(() => alert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'));
-    }
-  </script>
+<!-- 📊 APP -->
+<div id="app" class="layout hidden">
+  <div class="sidebar">
+    <h3>พรพิศาล ค้าส่ง</h3>
+    <button onclick="show('bill')">📄 ใบวางบิล</button>
+    <button onclick="show('expense')">💸 ค่าใช้จ่าย</button>
+    <button onclick="show('income')">💰 รายรับ</button>
+    <button onclick="logout()">🚪 ออกจากระบบ</button>
+  </div>
+
+  <div class="content">
+    <div id="bill" class="card">
+      <h2>บันทึกใบวางบิล</h2>
+      <input placeholder="ชื่อบริษัท">
+      <input type="number" placeholder="ยอดเงิน">
+      <input type="date">
+      <input type="time">
+      <button>บันทึก</button>
+    </div>
+
+    <div id="expense" class="card hidden">
+      <h2>บันทึกค่าใช้จ่าย</h2>
+      <input placeholder="รายการ">
+      <input type="number" placeholder="ยอดเงิน">
+      <button>บันทึก</button>
+    </div>
+
+    <div id="income" class="card hidden">
+      <h2>บันทึกรายรับ</h2>
+      <input placeholder="ที่มา">
+      <input type="number" placeholder="ยอดเงิน">
+      <button>บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const BACKEND = 'https://phornpisarn-backend-live.onrender.com';
+
+function checkLogin(){
+  const token = localStorage.getItem('token');
+  document.getElementById('login').classList.toggle('hidden', !!token);
+  document.getElementById('app').classList.toggle('hidden', !token);
+}
+checkLogin();
+
+function login(){
+  fetch(BACKEND + '/login',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      username:user.value,
+      password:pass.value
+    })
+  })
+  .then(r=>{ if(!r.ok) throw 0; return r.json(); })
+  .then(d=>{
+    localStorage.setItem('token', d.token);
+    checkLogin();
+  })
+  .catch(()=>alert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'));
+}
+
+function logout(){
+  localStorage.removeItem('token');
+  checkLogin();
+}
+
+function show(id){
+  document.querySelectorAll('.card').forEach(c=>c.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+</script>
+
 </body>
 </html>
