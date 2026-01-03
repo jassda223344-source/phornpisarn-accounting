@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>พรพิศาล ค้าส่ง | ระบบบัญชี</title>
+</head>
+<body>
+  <h2>เข้าสู่ระบบบัญชี - พรพิศาล ค้าส่ง</h2>
+
+  <input id="user" placeholder="Username" />
+  <br><br>
+  <input id="pass" type="password" placeholder="Password" />
+  <br><br>
+  <button onclick="login()">เข้าสู่ระบบ</button>
+
+  <script>
+    function login() {
+      fetch('https://phornpisarn-backend-live.onrender.com/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: user.value,
+          password: pass.value
+        })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('Login failed');
+        return res.json();
+      })
+      .then(data => {
+        localStorage.setItem('token', data.token);
+        alert('เข้าสู่ระบบสำเร็จ');
+        // ต่อไปจะพาไปหน้าเมนู
+      })
+      .catch(() => alert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'));
+    }
+  </script>
+</body>
+</html>
